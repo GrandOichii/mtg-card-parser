@@ -1,0 +1,51 @@
+{
+    "text": "{W}{U}{B}{R}{G}, {T}, Sacrifice [CARDNAME]: Draw three cards.",
+    "abilities": [
+        {
+            "costs": [[
+                {
+                    "type": "mana_cost",
+                    "pips": [
+                        {
+                            "type": "colored_mana",
+                            "color": "W"
+                        },
+                        {
+                            "type": "colored_mana",
+                            "color": "U"
+                        },
+                        {
+                            "type": "colored_mana",
+                            "color": "B"
+                        },
+                        {
+                            "type": "colored_mana",
+                            "color": "R"
+                        },
+                        {
+                            "type": "colored_mana",
+                            "color": "G"
+                        }
+                    ]
+                },
+                {
+                    "type": "tap"
+                },
+                {
+                    "type": "sacrifice_cost"
+                }
+            ]],
+            "effects": [
+                {
+                    "type": "draw_cards_effect",
+                    "amount": {
+                        "type": "numeric",
+                        "amount": 3
+                    }
+                }
+            ],
+            "zones": ["battlefield"],
+            "isMana": false
+        }
+    ]
+}

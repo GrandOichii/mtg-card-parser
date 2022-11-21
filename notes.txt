@@ -1,0 +1,6 @@
+== Effects ==
+
+Effects are certain ordered game actions. Use the stack. Cam be found:
+- Instant, Sorcery: main effects
+- Activated abilities: as the effect
+
