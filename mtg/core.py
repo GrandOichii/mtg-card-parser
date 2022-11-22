@@ -416,13 +416,13 @@ class Card(JSONObject):
         self.text = self.text.replace('\'s ', '`s ')
 
 class Cost(JSONObject):
-    def __init__(self, s: str):
+    def __init__(self, s: str, l: 'Line'):
         self.options: list[list[CostPart]] = []
         # self.costs: list[CostPart] = []
         for option in s.split(' or '):
             costs = []
             for cs in option.split(', '):
-                costs += [CostPart.parse(cs)]
+                costs += [CostPart.parse(cs, l)]
             self.options += [costs]
 
     def to_json(self):
@@ -435,7 +435,7 @@ class Cost(JSONObject):
         return result
         
 class CostPart(JSONObject):
-    def parse(s: str) -> 'Cost':
+    def parse(s: str, l: 'Line') -> 'Cost':
         if s == '{T}':
             return Tap()
         if s == '{Q}':
@@ -445,6 +445,8 @@ class CostPart(JSONObject):
         m = re.findall(MANA_PIP_R, s)
         if m:
             return ManaPipGroup(m)
+
+        # failed to parse cost part
         result = CostPart()
         return result
 
@@ -545,10 +547,27 @@ class Untap(JSONObject):
     def to_json(self) -> dict:
         return {"type": "untap"}
 
+class Ability(JSONObject):
+    def __init__(self):
+        super().__init__()
+        self.cost: Cost = []
+        self.effect: Effect = []
+        self.zones: list[str] = []
+        self.isMana: bool = False
+
+    def to_json(self):
+        result = {
+            'costs': self.cost.to_json(),
+            'effects': self.effect.to_json(),
+            'zones': self.zones,
+            'isMana': self.isMana
+        }
+        return result
+
 class CardText(JSONObject):
     def __init__(self):
         self.orig_text = ''
-        self.abilities: list = []
+        self.abilities: list[Ability] = []
 
     def parse(text: str):
         result = CardText()
@@ -558,6 +577,15 @@ class CardText(JSONObject):
             lines += [Line.parse(line)]
         for line in lines:
             line.extract_to(result)
+        return result
+
+    def to_json(self):
+        result = {
+            'text': self.orig_text,
+            'abilities': []
+        }
+        for a in self.abilities:
+            result['abilities'] += [a.to_json()]
         return result
 
 # class Ability(JSONObject):
@@ -623,7 +651,7 @@ class Line(JSONObject):
         return result
 
     def extract_to(self, t: CardText):
-        for r, f in EXTRACTOR_MAP.items():
-            m = re.match(r, self.text)
-            if not m: continue
-            f(self, m)
+        for f in EXTRACTORS:
+            parsed = f(self, t)
+            if parsed:
+                break

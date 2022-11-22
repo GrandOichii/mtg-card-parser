@@ -1,6 +1,7 @@
 
 class JSONObject:
     def to_json(self):
+        return {'type': 'CANT PARSE'}
         return {'type': 'UNKNOWN_COST'}
         raise Exception('to_json NOT IMPLEMENTED')
  
@@ -30,3 +31,18 @@ NUMS = [
     'nineteen',
     'twenty'
 ]
+
+class Amount(JSONObject):
+    def __init__(self):
+        pass
+
+class NumericAmount(JSONObject):
+    def __init__(self, amount: int) -> None:
+        super().__init__()
+        self.amount = amount
+
+    def to_json(self):
+        return {
+            'type': 'numeric_amount',
+            'amount': self.amount
+        }
