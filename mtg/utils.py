@@ -2,7 +2,6 @@
 class JSONObject:
     def to_json(self):
         return {'type': 'CANT PARSE'}
-        return {'type': 'UNKNOWN_COST'}
         raise Exception('to_json NOT IMPLEMENTED')
  
     def from_json(d: dict):
@@ -46,3 +45,5 @@ class NumericAmount(JSONObject):
             'type': 'numeric_amount',
             'amount': self.amount
         }
+
+BATTLEFIELD_ZONE = 'battlefield'

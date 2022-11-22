@@ -10,6 +10,8 @@ CARDNAME_T = '[CARDNAME]'
 
 MANA_PIP_R = r'(\{[^E]\})'
 
+LIFE_COST_R = r'Pay (.+) life'
+
 REPLACE_REMINDER_R = r'(\(.+\))'
 
 CARD_TYPES = [
@@ -416,13 +418,12 @@ class Card(JSONObject):
         self.text = self.text.replace('\'s ', '`s ')
 
 class Cost(JSONObject):
-    def __init__(self, s: str, l: 'Line'):
+    def __init__(self, a: 'Ability',  s: str, l: 'Line'):
         self.options: list[list[CostPart]] = []
-        # self.costs: list[CostPart] = []
         for option in s.split(' or '):
             costs = []
             for cs in option.split(', '):
-                costs += [CostPart.parse(cs, l)]
+                costs += [CostPart.parse(cs, l, a)]
             self.options += [costs]
 
     def to_json(self):
@@ -433,26 +434,66 @@ class Cost(JSONObject):
                 a += [cost.to_json()]
             result += [a]
         return result
+
+def tap_cost_matcher(s: str, l: 'Line', a: 'Ability'):
+    if s == '{T}':
+        return Tap()
+    return None
+
+def untap_cost_matcher(s: str, l: 'Line', a: 'Ability'):
+    if s == '{Q}':
+        return Untap()
+    return None
+
+# def energy_cost_matcher(s: str, l: 'Line', a: 'Ability'):
+#     if s == '{E}':
+#         return Energy()
+#     return None
+
+def manapip_cost_matcher(s: str, l: 'Line', a: 'Ability'):
+    m = re.findall(MANA_PIP_R, s)
+    if m:
+        return ManaPipGroup(m)
+    return None
+
+def pay_life_cost_matcher(s: str, l: 'Line', a: 'Ability'):
+    m = re.match(LIFE_COST_R, s)
+    if m:
+        amount = NumericAmount(m.groups()[0])
+        result = LifeCost()
+        result.amount = amount
+        return result
+    return None
+
+COST_MATCHERS = [
+    tap_cost_matcher,
+    untap_cost_matcher,
+    # energy_cost_matcher,
+    manapip_cost_matcher,
+    pay_life_cost_matcher,
+]
         
 class CostPart(JSONObject):
-    def parse(s: str, l: 'Line') -> 'Cost':
-        if s == '{T}':
-            return Tap()
-        if s == '{Q}':
-            return Untap()
-        if s == '{E}':
-            return Energy()
-        m = re.findall(MANA_PIP_R, s)
-        if m:
-            return ManaPipGroup(m)
+    def parse(s: str, l: 'Line', a: 'Ability') -> 'Cost':
+        for matcher in COST_MATCHERS:
+            result = matcher(s, l, a)
+            if result: return result
+        return CostPart()
 
-        # failed to parse cost part
-        result = CostPart()
-        return result
+# class Energy(JSONObject):
+#     def to_json(self):
+#         return {'type': 'energy'}
 
-class Energy(JSONObject):
+class LifeCost(CostPart):
+    def __init__(self):
+        super().__init__()
+        self.amount: Amount = None
+
     def to_json(self):
-        return {'type': 'energy'}
+        return {
+            'type': 'life_cost',
+            'amount': self.amount.to_json()
+        }
 
 class ManaPip(JSONObject):
     def __init__(self):
@@ -539,7 +580,7 @@ class ManaPipGroup(CostPart):
         result['pips'] = pips
         return result
 
-class Tap(JSONObject):
+class Tap(CostPart):
     def to_json(self) -> dict:
         return {"type": "tap"}
 

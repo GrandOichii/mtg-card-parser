@@ -64,7 +64,6 @@ def draw_cards_matcher(e: 'Effect', s: str, line: 'Line'):
         result.amount = amount
         e.effects += [result]
         return True
-    # print('Draw:', m.groups()[0])
     return False
 
 ''''''

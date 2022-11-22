@@ -13,13 +13,12 @@ def extract_ability(l: 'Line', t: 'CardText'):
         return False
     g = m.groups()
     result = core.Ability()
-    costs = core.Cost(g[0], l) # move line to cost 
-    effect = Effect(result, g[1], l) # move line to effect - these both require the references (?)
+    costs = core.Cost(result, g[0], l)
+    effect = Effect(result, g[1], l)
     result.cost = costs
     result.effect = effect
-    # print(l.text)
-    # print(json.dumps(effect.to_json(), indent=4))
-    # print(effect)
+    if len(result.zones) == 0:
+        result.zones = [BATTLEFIELD_ZONE]
     t.abilities += [result]
     return True
 

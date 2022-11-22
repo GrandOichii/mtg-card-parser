@@ -18,7 +18,6 @@ for chunk in data:
         print(json.dumps(chunk, indent=4))
 
 for card in cards:
-    # print(card.text)
     if not 'Draw' in card.text: continue
     t = CardText.parse(card.text)
     print(card.name)
