@@ -409,18 +409,11 @@ class Card(JSONObject):
         self.text = self.text.replace(self.name, CARDNAME_T)
         # replace reminder text
         self.text = re.sub(REPLACE_REMINDER_R, '', self.text)
-
-        # START_TEXT_R = r'.+ — '
-        # r = re.match(START_TEXT_R, self.text)
-        # if not r:
-        #     return
-        # orig = self.text
-        # self.text = self.text.replace(r.group(), '', 1)
-        # g = r.group()
-        # t = self.text
-        # return
+        # remove ability words and flavor words
         for i in ABILITY_WORDS + FLAVOR_WORDS:
             self.text = self.text.replace(i, '')
+        # replace 's
+        self.text = self.text.replace('\'s ', '`s ')
 
 class Cost(JSONObject):
     def __init__(self, s: str):
@@ -475,38 +468,46 @@ class ManaPip(JSONObject):
             return ColoredManaPip(s)
         return GenericManaPip(s)
 
-    def get_str(self):
-        return ''
-
-    def to_str(self):
-        result = self.get_str()
-        # print(dir(self))
+    def to_json(self):
+        result = {'type': 'UNKNOWN'}
         if self.alt:
-            result += '/' + self.alt.get_str()
+            result['alt'] = self.alt.to_json()
         return result
 
 class SnowManaPip(ManaPip):
-    def get_str(self):
-        return 'S'
+    def to_json(self):
+        result = super().to_json()
+        result['type'] = 'snow_mana'
+        return result
 
 class ColorlessManaPip(ManaPip):
-    def get_str(self):
-        return 'C'
+    def to_json(self):
+        result = super().to_json()
+        result['type'] = 'colorless'
+        return result
 
 class XManaPip(ManaPip):
     def __init__(self):
         super().__init__()
 
-    def get_str(self):
-        return 'X'
+    def to_json(self):
+        result = super().to_json()
+        result['type'] = 'x_mana'
+        return result
 
 class GenericManaPip(ManaPip):
     def __init__(self, s: str):
         super().__init__()
         self.value: int = int(s)
 
-    def get_str(self):
-        return str(self.value)
+    # def get_str(self):
+    #     return str(self.value)
+
+    def to_json(self):
+        result = super().to_json()
+        result['type'] = 'generic'
+        result['amount'] = self.value
+        return result
 
 class ColoredManaPip(ManaPip):
     def __init__(self, s: str):
@@ -515,6 +516,12 @@ class ColoredManaPip(ManaPip):
 
     def get_str(self):
         return self.color
+
+    def to_json(self):
+        result = super().to_json()
+        result['type'] = 'colored_mana'
+        result['color'] = self.color
+        return result
 
 class ManaPipGroup(CostPart):
     def __init__(self, l: list[str]):
@@ -526,7 +533,7 @@ class ManaPipGroup(CostPart):
         result = {"type": "mana_cost"}
         pips = []
         for pip in self.pips:
-            pips += [pip.to_str()]
+            pips += [pip.to_json()]
         result['pips'] = pips
         return result
 

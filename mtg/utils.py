@@ -7,3 +7,26 @@ class JSONObject:
     def from_json(d: dict):
         raise Exception('from_json NOT IMPLEMENTED')
  
+
+NUMS = [
+    'zero',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen',
+    'twenty'
+]

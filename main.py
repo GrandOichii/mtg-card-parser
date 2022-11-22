@@ -2,7 +2,7 @@ import json
 
 from mtg.core import *
 
-data = json.loads(open('cards.json', 'r').read())
+data = json.loads(open('batch.json', 'r').read())
 cards: list[Card] = []
 for chunk in data:
     if 'card_faces' in chunk.keys():

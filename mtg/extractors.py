@@ -3,6 +3,7 @@ import json
 
 from mtg.core import *
 from mtg.utils import *
+from mtg.effect import *
 
 import mtg.core as core
 
@@ -20,8 +21,8 @@ import mtg.core as core
 def extract_ability(l: 'Line', m: re.Match):
     g = m.groups()
     print(l.text)
-    costs = core.Cost(g[0])
-    # effect = g[1]
+    costs = core.Cost(g[0]) # move line to cost 
+    effect = Effect(costs, g[1]) # move line to effect - these both require the references (?)
     print(json.dumps(costs.to_json(), indent=4))
     # print(effect)
 
